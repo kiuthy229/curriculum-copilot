@@ -1,0 +1,10 @@
+{
+  "LLM evaluation": "Consider adding content on evaluating large language models, including metrics, bias testing, and human-in-the-loop evaluation.",
+  "MCP": "Introduce Model-Context Protocol (MCP) patterns and examples for chaining model calls and tool use.",
+  "Agent orchestration": "Cover agent design patterns, safety considerations, and orchestration frameworks for multi-agent workflows.",
+  "AI-assisted development": "Add sections on AI-assisted coding workflows, tool calling, and prompt engineering for developer tooling.",
+  "RAG": "Teach Retrieval-Augmented Generation: vector stores, retrieval strategies, and integration with LLMs.",
+  "LLMOps": "Include topics on deployment, monitoring, and lifecycle management for LLM-based systems.",
+  "Retrieval-Augmented Generation": "Provide examples of RAG pipelines, evaluation, and common pitfalls.",
+  "AI search": "Discuss AI-powered search, semantic ranking, and evaluation for modern search systems."
+}

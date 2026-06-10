@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body{font-family:Arial, sans-serif;padding:10px}
+      button{padding:6px 10px;border-radius:6px;background:#1a73e8;color:#fff;border:none}
+      .suggestion{border-radius:6px;padding:8px;margin:6px 0;background:#f1f3f4}
+      .topic{font-weight:600}
+      .small{font-size:12px;color:#555}
+    </style>
+  </head>
+  <body>
+    <h3>Curriculum Copilot</h3>
+    <div id="status" class="small">Ready</div>
+    <div style="margin-top:8px">
+      <button id="analyze">Analyze document</button>
+      <label style="margin-left:8px; font-size:13px"><input type="checkbox" id="auto"> Auto every 20s</label>
+    </div>
+
+    <div id="results" style="margin-top:12px"></div>
+
+    <script>
+      const statusEl = document.getElementById('status');
+      const resultsEl = document.getElementById('results');
+      const autoCheckbox = document.getElementById('auto');
+      let timer = null;
+
+      document.getElementById('analyze').addEventListener('click', analyze);
+      autoCheckbox.addEventListener('change', (e) => {
+        if (e.target.checked) timer = setInterval(analyze, 20000); else { clearInterval(timer); timer = null; }
+      });
+
+      function analyze() {
+        statusEl.textContent = 'Analyzing…';
+        resultsEl.innerHTML = '';
+        google.script.run.withSuccessHandler(showResult).withFailureHandler(err=>{statusEl.textContent='Error'; resultsEl.textContent = String(err)}).sendDocToCopilot();
+      }
+
+      function showResult(r){
+        statusEl.textContent = 'Last update: ' + new Date().toLocaleTimeString();
+        if(!r) { resultsEl.textContent = 'No response'; return }
+        if(r.error) { resultsEl.textContent = 'Error: ' + r.error; return }
+        const body = r.body || {};
+
+        const report = body.report || body;
+        const snippet = body.snippet || (report && report.snippet) || '';
+        const summary = report && report.textReport;
+
+        const frag = [];
+        if(report && report.freshness !== undefined) frag.push(`<div><strong>Freshness:</strong> ${report.freshness}%</div>`);
+        if(report && report.present && report.present.length) {
+          frag.push('<div><strong>Detected topics:</strong><ul>' + report.present.map(p=>`<li>${escapeHtml(p)}</li>`).join('') + '</ul></div>');
+        }
+        if(report && report.suggestions && report.suggestions.length) {
+          frag.push('<div><strong>Recommendations:</strong></div>');
+          frag.push('<div>');
+          for(const s of report.suggestions) {
+            frag.push(`<div class="suggestion"><div class="topic">${escapeHtml(s.topic)}</div><div class="small">${escapeHtml(s.suggestion || '')}</div><div style="margin-top:6px"><button data-topic="${escapeHtml(s.topic)}">Apply suggestion</button></div></div>`);
+          }
+          frag.push('</div>');
+        }
+        if(summary) frag.push(`<div style="margin-top:8px"><strong>Summary</strong><div class="small">${escapeHtml(summary).replace(/\n/g,'<br>')}</div></div>`);
+        if(snippet) frag.push(`<div style="margin-top:8px"><strong>Snippet</strong><pre class="small">${escapeHtml(snippet)}</pre></div>`);
+
+        resultsEl.innerHTML = frag.join('');
+
+        // wire apply buttons
+        Array.from(resultsEl.querySelectorAll('button[data-topic]')).forEach(btn=>{
+          btn.addEventListener('click', ()=>{
+            const topic = btn.getAttribute('data-topic');
+            // find suggestion text from report
+            const s = (report.suggestions || []).find(x => x.topic === topic);
+            if(!s) return;
+            statusEl.textContent = 'Applying suggestion…';
+            google.script.run.withSuccessHandler((r)=>{ statusEl.textContent = r.success ? 'Applied' : 'Failed'; }).withFailureHandler(e=>{ statusEl.textContent = 'Error'; }).applySuggestion(s.suggestion || ('Add content about ' + topic));
+          })
+        })
+      }
+
+      function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "current": [
+    "REST API",
+    "MVC",
+    "Docker",
+    "SQL",
+    "Unit testing",
+    "Microservices"
+  ],
+  "emerging": [
+    "LLM evaluation",
+    "MCP",
+    "Agent orchestration",
+    "AI-assisted development",
+    "RAG",
+    "LLMOps",
+    "Retrieval-Augmented Generation",
+    "AI search"
+  ]
+}
