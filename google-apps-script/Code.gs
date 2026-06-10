@@ -1,11 +1,20 @@
 // Google Apps Script server-side code for Curriculum Copilot reviewer
-// Update `COPILOT_ENDPOINT` to your backend URL, e.g. 'https://your-hosthttps://curriculum-copilot.onrender.com/upload-from-doc'
+// Update `COPILOT_ENDPOINT` to your backend URL, e.g. 'https://curriculum-copilot.onrender.com/upload-from-doc'
 const COPILOT_ENDPOINT = 'https://curriculum-copilot.onrender.com/upload-from-doc';
 
-function onOpen() {
-  DocumentApp.getUi().createMenu('Curriculum Copilot')
-    .addItem('Open Reviewer', 'showSidebar')
-    .addToUi();
+function onOpen(e) {
+  // Guard `onOpen` because calling DocumentApp.getUi() from the Apps Script editor
+  // (a standalone project) will throw: "Cannot call DocumentApp.getUi() from this context.".
+  // This function should be triggered by opening a Google Doc that the script is bound to.
+  try {
+    const ui = DocumentApp.getUi();
+    ui.createMenu('Curriculum Copilot')
+      .addItem('Open Reviewer', 'showSidebar')
+      .addToUi();
+  } catch (err) {
+    // Likely running in the script editor or non-container context. Log and ignore.
+    console.log('onOpen: not running in a container-bound Google Doc context. Menu not created.');
+  }
 }
 
 function showSidebar() {
@@ -22,12 +31,16 @@ function sendDocToCopilot() {
 
   const payload = JSON.stringify({ title: title, content: content });
 
+  // Read API key from Script Properties, if configured
+  const key = PropertiesService.getScriptProperties().getProperty('COPILOT_KEY');
+
   const options = {
     method: 'post',
     contentType: 'application/json',
     payload: payload,
     muteHttpExceptions: true,
     // timeout: 30000 // optional
+    headers: key ? { Authorization: 'Bearer ' + key } : {}
   };
 
   try {

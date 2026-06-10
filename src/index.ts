@@ -4,6 +4,7 @@ import multer from "multer";
 import path from "path";
 import { extractTextFromFile } from "./extract";
 import { detectDrift } from "./drift";
+import { requireApiKey } from "./middleware/requireApiKey";
 
 const upload = multer({ dest: "./uploads" });
 const app = express();
@@ -24,7 +25,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 });
 
 // Accept JSON payload from Google Apps Script (title + content)
-app.post("/upload-from-doc", async (req, res) => {
+app.post("/upload-from-doc", requireApiKey, async (req, res) => {
   try {
     const { title, content } = req.body as { title?: string; content?: string };
     if (!content) return res.status(400).json({ error: "content required" });
