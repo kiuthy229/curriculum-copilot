@@ -1,6 +1,6 @@
 // Google Apps Script server-side code for Curriculum Copilot reviewer
-// Update `COPILOT_ENDPOINT` to your backend URL, e.g. 'https://your-host/upload-from-doc'
-const COPILOT_ENDPOINT = 'https://your-server.example.com/upload-from-doc';
+// Update `COPILOT_ENDPOINT` to your backend URL, e.g. 'https://your-hosthttps://curriculum-copilot.onrender.com/upload-from-doc'
+const COPILOT_ENDPOINT = 'https://curriculum-copilot.onrender.com/upload-from-doc';
 
 function onOpen() {
   DocumentApp.getUi().createMenu('Curriculum Copilot')

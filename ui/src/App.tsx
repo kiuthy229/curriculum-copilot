@@ -14,7 +14,7 @@ function App() {
     try {
       const fd = new FormData()
       fd.append('file', file)
-      const res = await fetch('http://localhost:4000/upload', {
+      const res = await fetch('https://curriculum-copilot.onrender.com/upload', {
         method: 'POST',
         body: fd
       })
